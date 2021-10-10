@@ -1,2 +1,14 @@
 Axis Aligned Collision Detection:
-- 
+- Show point rectangle Overlap
+- Show rectangle rectangle Overlap
+
+Simple Collision Resolution
+- Show AABB approach resolving by minimum distance. Show problem with fast moving object frame by frame (or thin overlap)
+
+Raycasting
+- Define ray by a point + direction (or P Q with Q = P + ray length)
+    - ray can be defined using line function P(t) = P + Dt
+- Show Ray Box overlap
+
+Collision Resolution
+- Show Sweep AABB
