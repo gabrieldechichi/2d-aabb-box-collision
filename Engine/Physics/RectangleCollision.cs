@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 
 namespace ArbitraryCollisionRectangle.Engine.Physics
@@ -35,7 +36,7 @@ namespace ArbitraryCollisionRectangle.Engine.Physics
 
             if (px < py)
             {
-                var sign = Math.Sign(dx);
+                var sign = SignFixed(dx);
                 hit.Normal.X = sign;
                 hit.Point.X = rect.Center.X + rect.Extents.X * sign;
                 hit.Point.Y = point.Y;
@@ -43,7 +44,7 @@ namespace ArbitraryCollisionRectangle.Engine.Physics
             }
             else
             {
-                var sign = Math.Sign(dy);
+                var sign = SignFixed(dy);
                 hit.Normal.Y = sign;
                 hit.Point.Y = rect.Center.Y + rect.Extents.Y * sign;
                 hit.Point.X = point.X;
@@ -56,31 +57,51 @@ namespace ArbitraryCollisionRectangle.Engine.Physics
         /// <summary>
         /// Calculates penetration of r1 into r2
         /// </summary>
-        public static Vector2 CalculateRectangleRectanglePenetration(in RectangleF r1, in RectangleF r2)
+        public static Hit2d CalculateRectangleRectanglePenetration(in RectangleF r1, in RectangleF r2)
         {
-            var penetration = Vector2.Zero;
+            var hit = new Hit2d();
 
-            if (RectangleOverlap.RectangleRectangleOverlap(r1, r2))
+            var dx = r1.Center.X - r2.Center.X;
+            var px = (r1.Extents.X + r2.Extents.X) - Math.Abs(dx);
+
+            if (px <= 0)
             {
-                var rightMinuLeft = r1.Right - r2.Left;
-                var leftMinusRight = r1.Left - r2.Right;
-                penetration.X = MathF.Abs(rightMinuLeft) < MathF.Abs(leftMinusRight) ? rightMinuLeft : leftMinusRight;
-
-                var bottomMinusTop = r1.Bottom - r2.Top;
-                var topMinusBottom = r1.Top - r2.Bottom;
-
-                penetration.Y = MathF.Abs(bottomMinusTop) < MathF.Abs(topMinusBottom) ? bottomMinusTop : topMinusBottom;
-
-                if (Math.Abs(penetration.X) < Math.Abs(penetration.Y))
-                {
-                    penetration.Y = 0;
-                }
-                else
-                {
-                    penetration.X = 0;
-                }
+                Debug.WriteLine($"Px {px}, Dx {dx}");
+                return hit;
             }
-            return penetration;
+
+            var dy = r1.Center.Y - r2.Center.Y;
+            var py = (r1.Extents.Y + r2.Extents.Y) - Math.Abs(dy);
+
+            if (py <= 0)
+            {
+                Debug.WriteLine($"Py {py}, Dy {dy}");
+                return hit;
+            }
+
+            if (px < py)
+            {
+                var sign = SignFixed(dx);
+                hit.Normal.X = sign;
+                hit.Point.X = r2.Center.X + r2.Extents.X * sign;
+                hit.Point.Y = r1.Center.Y;
+                hit.Penetration.X = px * sign;
+            }
+            else
+            {
+                var sign = SignFixed(dy);
+                hit.Normal.Y = sign;
+                hit.Point.Y = r2.Center.Y + r2.Extents.Y * sign;
+                hit.Point.X = r1.Center.X;
+                hit.Penetration.Y = py * sign;
+            }
+
+            return hit;
+        }
+
+        private static float SignFixed(float n)
+        {
+            return n >= 0 ? 1.0f : -1.0f;
         }
     }
 }

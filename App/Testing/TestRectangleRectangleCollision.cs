@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using ArbitraryCollisionRectangle.Engine.Physics;
 using ArbitraryCollisionRectangle.Engine.Rendering;
 using Microsoft.Xna.Framework;
@@ -20,21 +21,23 @@ namespace ArbitraryCollisionRectangle.App.Testing
             base.Initialize();
         }
 
-        protected override void UpdateGame(GameTime gameTime)
-        {
-            mouseRect.Center = Mouse.GetState(Window).Position.ToVector2();
-            var penetration = RectangleCollision.CalculateRectangleRectanglePenetration(mouseRect, testRect);
-            mouseRect.Center -= penetration;
-        }
-
         protected override void DrawSprites(GameTime gameTime)
         {
-            var isOverlap = RectangleOverlap.RectangleRectangleOverlap(mouseRect, testRect);
-            var drawColor = isOverlap ? Color.Green : Color.Red;
+            mouseRect.Center = Mouse.GetState(Window).Position.ToVector2();
+            var hit = RectangleCollision.CalculateRectangleRectanglePenetration(mouseRect, testRect);
+            mouseRect.Center += hit.Penetration;
+
+            var drawColor = hit.DidHit ? Color.Green : Color.Red;
             DrawPrimitivesUtility.DrawRectangle(spriteBatch, (Rectangle)testRect, drawColor, 2);
 
             DrawPrimitivesUtility.DrawRectangle(spriteBatch, (Rectangle)mouseRect, Color.Black, 2);
-            DrawPrimitivesUtility.DrawPoint(spriteBatch, mouseRect.TopLeft.ToPoint(), Color.Red, 5);
+
+            DrawPrimitivesUtility.DrawLine(spriteBatch, hit.Point, hit.Point + hit.Normal * 10, Color.Blue, 2);
+            DrawPrimitivesUtility.DrawLine(spriteBatch, hit.Point, hit.Point - hit.Penetration, Color.Red, 2);
+        }
+
+        protected override void UpdateGame(GameTime gameTime)
+        {
         }
     }
 }

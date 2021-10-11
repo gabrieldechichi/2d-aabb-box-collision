@@ -30,8 +30,8 @@ namespace ArbitraryCollisionRectangle.App.Testing
         {
             var dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
             character.Update(dt);
-            var penetration = RectangleCollision.CalculateRectangleRectanglePenetration(character.Rect, ground);
-            character.Rect.Center -= penetration;
+            var hit = RectangleCollision.CalculateRectangleRectanglePenetration(character.Rect, ground);
+            character.Rect.Center += hit.Penetration;
         }
 
         protected override void DrawSprites(GameTime gameTime)
