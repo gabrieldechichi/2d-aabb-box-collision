@@ -1,3 +1,4 @@
+using System;
 using ArbitraryCollisionRectangle.Engine.Physics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -16,6 +17,21 @@ namespace ArbitraryCollisionRectangle.Engine.Rendering
                 pointTexture.SetData<Color>(new Color[] { Color.White });
             }
             return pointTexture;
+        }
+
+        public static void DrawLine(SpriteBatch spriteBatch, Vector2 from, Vector2 to, Color color, float lineWidth = 1f)
+        {
+            var distance = Vector2.Distance(from, to);
+            var angle = (float)Math.Atan2(to.Y - from.Y, to.X - from.X);
+            DrawLine(spriteBatch, from, distance, angle, color, lineWidth);
+        }
+
+        public static void DrawLine(SpriteBatch spriteBatch, Vector2 from, float length, float angle, Color color, float thickness = 1f)
+        {
+            var origin = new Vector2(0f, 0.5f);
+            var scale = new Vector2(length, thickness);
+            var pointTex = GetOrCreatePointTexture(spriteBatch);
+            spriteBatch.Draw(pointTex, from, null, color, angle, origin, scale, SpriteEffects.None, 0);
         }
 
         public static void DrawRectangle(SpriteBatch spriteBatch, Rectangle rectangle, Color color, int lineWidth)

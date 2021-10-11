@@ -21,13 +21,16 @@ namespace ArbitraryCollisionRectangle.App.Testing
         protected override void DrawSprites(GameTime gameTime)
         {
             var mousePos = Mouse.GetState(Window).Position;
-            var isOverlap = RectangleOverlap.PointRectangleOverlap(new Vector2(mousePos.X, mousePos.Y), testRect);
-            var drawColor = isOverlap ? Color.Green : Color.Red;
+            var hit = RectangleCollision.CalculatePointRectangelPenetration(mousePos.ToVector2(), testRect);
+
+            var drawColor = hit.DidHit ? Color.Green : Color.Red;
             DrawPrimitivesUtility.DrawRectangle(spriteBatch, (Rectangle)testRect, drawColor, 2);
 
-            var penetration = RectangleCollision.CalculatePointRectangelPenetration(mousePos.ToVector2(), testRect);
-            var adjustedPos = mousePos.ToVector2() - penetration;
+            var adjustedPos = mousePos.ToVector2() + hit.Penetration;
             DrawPrimitivesUtility.DrawPoint(spriteBatch, adjustedPos.ToPoint(), Color.Red, 5);
+
+            DrawPrimitivesUtility.DrawLine(spriteBatch, hit.Point, hit.Point + hit.Normal * 10, Color.Blue, 2);
+            DrawPrimitivesUtility.DrawLine(spriteBatch, hit.Point, hit.Point - hit.Penetration, Color.Red, 2);
         }
 
         protected override void UpdateGame(GameTime gameTime)

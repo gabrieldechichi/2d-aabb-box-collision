@@ -8,7 +8,7 @@ namespace ArbitraryCollisionRectangle
         [STAThread]
         static void Main()
         {
-            using (var game = new TestSimplePlatformer())
+            using (var game = new TestPointRectangleCollision())
                 game.Run();
         }
     }

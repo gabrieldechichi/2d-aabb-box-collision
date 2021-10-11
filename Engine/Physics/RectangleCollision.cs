@@ -3,28 +3,54 @@ using Microsoft.Xna.Framework;
 
 namespace ArbitraryCollisionRectangle.Engine.Physics
 {
+    public struct Hit2d
+    {
+        public Vector2 Point;
+        public Vector2 Normal;
+        public Vector2 Penetration;
+
+        public bool DidHit => Penetration != Vector2.Zero;
+    }
     public static class RectangleCollision
     {
-        public static Vector2 CalculatePointRectangelPenetration(in Vector2 point, in RectangleF rect)
+        public static Hit2d CalculatePointRectangelPenetration(in Vector2 point, in RectangleF rect)
         {
-            var penetration = Vector2.Zero;
+            var hit = new Hit2d();
 
-            if (RectangleOverlap.PointRectangleOverlap(point, rect))
+            var dx = point.X - rect.Center.X;
+            var px = rect.Extents.X - Math.Abs(dx);
+
+            if (px <= 0)
             {
-                penetration.X = point.X > rect.Center.X ? -(rect.Right - point.X) : point.X - rect.Left;
-                penetration.Y = point.Y > rect.Center.Y ? -(rect.Bottom - point.Y) : point.Y - rect.Top;
-
-                if (Math.Abs(penetration.X) < Math.Abs(penetration.Y))
-                {
-                    penetration.Y = 0;
-                }
-                else
-                {
-                    penetration.X = 0;
-                }
+                return hit;
             }
 
-            return penetration;
+            var dy = point.Y - rect.Center.Y;
+            var py = rect.Extents.Y - Math.Abs(dy);
+
+            if (py <= 0)
+            {
+                return hit;
+            }
+
+            if (px < py)
+            {
+                var sign = Math.Sign(dx);
+                hit.Normal.X = sign;
+                hit.Point.X = rect.Center.X + rect.Extents.X * sign;
+                hit.Point.Y = point.Y;
+                hit.Penetration.X = sign * px;
+            }
+            else
+            {
+                var sign = Math.Sign(dy);
+                hit.Normal.Y = sign;
+                hit.Point.Y = rect.Center.Y + rect.Extents.Y * sign;
+                hit.Point.X = point.X;
+                hit.Penetration.Y = sign * py;
+            }
+
+            return hit;
         }
 
         /// <summary>
