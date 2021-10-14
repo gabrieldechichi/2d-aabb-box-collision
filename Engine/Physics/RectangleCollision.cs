@@ -10,7 +10,17 @@ namespace ArbitraryCollisionRectangle.Engine.Physics
         public Vector2 Normal;
         public Vector2 Penetration;
 
+        public float Time;
+
         public bool DidHit => Penetration != Vector2.Zero;
+    }
+
+    public struct TempRayHit
+    {
+        public float NearTimeX, NearTimeY;
+        public float FarTimeX, FarTimeY;
+
+        public bool DidHit;
     }
     public static class RectangleCollision
     {
@@ -94,6 +104,43 @@ namespace ArbitraryCollisionRectangle.Engine.Physics
                 hit.Point.Y = r2.Center.Y + r2.Extents.Y * sign;
                 hit.Point.X = r1.Center.X;
                 hit.Penetration.Y = py * sign;
+            }
+
+            return hit;
+        }
+
+        public static Hit2d CalculateRayRectangleCollision(in Ray2D ray, in RectangleF rect)
+        {
+            var rayScaleX = 1.0f / ray.StartToEnd.X;
+            var rayScaleY = 1.0f / ray.StartToEnd.Y;
+            var raySignX = SignFixed(rayScaleX);
+            var raySignY = SignFixed(rayScaleY);
+
+            var nearTimeX = (rect.Center.X - raySignX * rect.Extents.X - ray.Start.X) * rayScaleX;
+            var nearTimeY = (rect.Center.Y - raySignY * rect.Extents.Y - ray.Start.Y) * rayScaleY;
+
+            var farTimeX = (rect.Center.X + raySignX * rect.Extents.X - ray.Start.X) * rayScaleX;
+            var farTimeY = (rect.Center.Y + raySignY * rect.Extents.Y - ray.Start.Y) * rayScaleY;
+
+            var nearTime = nearTimeX > nearTimeY ? nearTimeX : nearTimeY;
+            var farTime = farTimeX > farTimeY ? farTimeY : farTimeX;
+
+            var hit = new Hit2d();
+            if (!(nearTime < 0 && farTime < 0) && nearTime < farTime)
+            {
+                hit.Time = Math.Clamp(nearTime, 0, 1);
+                hit.Point = ray.GetPoint(hit.Time);
+                if (nearTimeX > nearTimeY)
+                {
+                    hit.Normal.X = -raySignX;
+                    hit.Normal.Y = 0;
+                }
+                else
+                {
+                    hit.Normal.X = 0;
+                    hit.Normal.Y = -raySignY;
+                }
+                hit.Penetration = -(1 - hit.Time) * (ray.StartToEnd);
             }
 
             return hit;
