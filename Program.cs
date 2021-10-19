@@ -8,7 +8,7 @@ namespace ArbitraryCollisionRectangle
         [STAThread]
         static void Main()
         {
-            using (var game = new TestRayRectangleCollision())
+            using (var game = new TestRayRectangleCollisionWithPadding())
                 game.Run();
         }
     }

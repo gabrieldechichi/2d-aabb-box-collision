@@ -27,6 +27,12 @@ namespace ArbitraryCollisionRectangle.Engine.Physics
             Size = size;
         }
 
+        public void Expand(Vector2 amount)
+        {
+            TopLeft -= amount;
+            Size += amount * 2;
+        }
+
         public static explicit operator Rectangle(RectangleF rect) => new Rectangle((int)rect.TopLeft.X, (int)rect.TopLeft.Y, (int)rect.Size.X, (int)rect.Size.Y);
 
     }

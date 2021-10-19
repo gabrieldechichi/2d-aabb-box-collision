@@ -111,16 +111,22 @@ namespace ArbitraryCollisionRectangle.Engine.Physics
 
         public static Hit2d CalculateRayRectangleCollision(in Ray2D ray, in RectangleF rect)
         {
+            return CalculateRayRectangleCollision(ray, rect, Vector2.Zero);
+        }
+
+        public static Hit2d CalculateRayRectangleCollision(in Ray2D ray, in RectangleF rect, in Vector2 padding)
+        {
             var rayScaleX = 1.0f / ray.StartToEnd.X;
             var rayScaleY = 1.0f / ray.StartToEnd.Y;
             var raySignX = SignFixed(rayScaleX);
             var raySignY = SignFixed(rayScaleY);
 
-            var nearTimeX = (rect.Center.X - raySignX * rect.Extents.X - ray.Start.X) * rayScaleX;
-            var nearTimeY = (rect.Center.Y - raySignY * rect.Extents.Y - ray.Start.Y) * rayScaleY;
+            var extents = rect.Extents + padding;
+            var nearTimeX = (rect.Center.X - raySignX * extents.X - ray.Start.X) * rayScaleX;
+            var nearTimeY = (rect.Center.Y - raySignY * extents.Y - ray.Start.Y) * rayScaleY;
 
-            var farTimeX = (rect.Center.X + raySignX * rect.Extents.X - ray.Start.X) * rayScaleX;
-            var farTimeY = (rect.Center.Y + raySignY * rect.Extents.Y - ray.Start.Y) * rayScaleY;
+            var farTimeX = (rect.Center.X + raySignX * extents.X - ray.Start.X) * rayScaleX;
+            var farTimeY = (rect.Center.Y + raySignY * extents.Y - ray.Start.Y) * rayScaleY;
 
             var nearTime = nearTimeX > nearTimeY ? nearTimeX : nearTimeY;
             var farTime = farTimeX > farTimeY ? farTimeY : farTimeX;
