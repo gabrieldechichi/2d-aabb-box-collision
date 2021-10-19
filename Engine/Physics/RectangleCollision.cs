@@ -15,13 +15,12 @@ namespace ArbitraryCollisionRectangle.Engine.Physics
         public bool DidHit => Penetration != Vector2.Zero;
     }
 
-    public struct TempRayHit
+    public struct Sweep2D
     {
-        public float NearTimeX, NearTimeY;
-        public float FarTimeX, FarTimeY;
-
-        public bool DidHit;
+        public Hit2d Hit;
+        public Vector2 Position;
     }
+
     public static class RectangleCollision
     {
         public static Hit2d CalculatePointRectangelPenetration(in Vector2 point, in RectangleF rect)
@@ -76,7 +75,6 @@ namespace ArbitraryCollisionRectangle.Engine.Physics
 
             if (px <= 0)
             {
-                Debug.WriteLine($"Px {px}, Dx {dx}");
                 return hit;
             }
 
@@ -85,7 +83,6 @@ namespace ArbitraryCollisionRectangle.Engine.Physics
 
             if (py <= 0)
             {
-                Debug.WriteLine($"Py {py}, Dy {dy}");
                 return hit;
             }
 
@@ -150,6 +147,43 @@ namespace ArbitraryCollisionRectangle.Engine.Physics
             }
 
             return hit;
+        }
+
+        public static Sweep2D RectRectSweep(in RectangleF r1, in Vector2 deltaR1, in RectangleF r2)
+        {
+            var sweep = new Sweep2D();
+            if (deltaR1 == Vector2.Zero)
+            {
+                sweep.Hit = CalculateRectangleRectanglePenetration(r1, r2);
+                sweep.Position = r1.Center + sweep.Hit.Penetration;
+            }
+            else
+            {
+                var ray = new Ray2D
+                {
+                    Start = r1.Center,
+                    End = r1.Center + deltaR1
+                };
+
+                sweep.Hit = CalculateRayRectangleCollision(ray, r2, r1.Extents);
+
+                if (sweep.Hit.DidHit)
+                {
+                    const float epsilon = 0.00001f;
+                    sweep.Hit.Time = Math.Clamp(sweep.Hit.Time - epsilon, 0, 1);
+                    sweep.Position = r1.Center + deltaR1 * sweep.Hit.Time;
+
+                    var deltaNormalized = deltaR1;
+                    deltaNormalized.Normalize();
+                    sweep.Hit.Point += deltaNormalized * r1.Extents;
+                }
+                else
+                {
+                    sweep.Position = r1.Center + deltaR1;
+                }
+            }
+
+            return sweep;
         }
 
         private static float SignFixed(float n)
